@@ -1,65 +1,48 @@
 const AppUserModel = require('../models/app-user.model')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const asyncHandler = require('express-async-handler')
 
 // get all User list
-exports.getAllUsers = (req, res)=> {
-    AppUserModel.getAllUsers((err, users) =>{
-        if(err)
-        res.status(500).json({
-            message: "Error getting users"
-        })
-        console.log('Users', users);
-        res.status(200).json({
-            succes: true,
-            message: "Users fetched",
-            data: users
-        })
-    })
-}
-
-// get Users by role
-exports.getUsersByRole = (req, res)=> {
-    if(req.user.role == "Manager" || req.user.role == "Admin")
-    AppUserModel.getUsersByRole(req.body.role, (err, users) =>{  
-        if(err)
-        res.status(500).json({
-            message: "Error getting users"
-        })
-        console.log('Users', users);
-        res.status(200).json({
-            succes: true,
-            message: "Users fetched",
-            data: users
-        })
-    })
+exports.getAllUsers = asyncHandler(async (req, res)=> {
+    if (req.user.role == "Admin") {
+        const users = await AppUserModel.getAllUsers()
+        res.status(200).json(users)
+    }
     else
     res.status(401).json({
         message: "You do not have enough permission"
     })
-}
+})
+
+// get Users by role
+exports.getUsersByRole = asyncHandler(async (req, res) => {
+    if (req.user.role == "Manager" || req.user.role == "Admin") {
+        const users = await AppUserModel.getUsersByRole(req.body.role)
+        res.status(200).json(users)
+    }
+    else
+    res.status(401).json({
+        message: "You do not have enough permission"
+    })
+})
 
 // get User by ID
-exports.getUserByID = (req, res)=>{
-    console.log(req.user)
+exports.getUserByID = asyncHandler(async (req, res) => {
+    console.log("getUserByID in controller called")
     if(req.user.role == "Superviseur" && req.user.id != req.params.id)
     res.status(401).json({
         message: "You do not have enough permission"
     })
-    else
-    AppUserModel.getUserByID(req.params.id, (err, user)=>{
-        if(err)
-        res.status(500).json({
-            message: "Error getting user"
-        })
-        console.log('single user data',user);
-        res.status(200).json({
-            succes: true,
-            message: "User fetched",
-            data: user
-        });
-    })
-}
+    else {
+        const user = await AppUserModel.getUserByID(req.params.id)
+        if (!user) {
+            res.status(404)
+            throw new Error('No user with that id found')
+        }
+        res.status(200).json(user)
+    }
+})
 
 // create new User
 exports.createNewUser = async (req, res) =>{
@@ -86,7 +69,7 @@ exports.createNewUser = async (req, res) =>{
             res.status(200).json({
                 success: true, 
                 message: 'User Created Successfully', 
-                data: user})
+                data: user.insertId})
             else
             res.status(500).json({
                 success: false,
@@ -110,10 +93,8 @@ exports.login = async (req, res) => {
     {
         token = generateToken(user)
         res.set('token', token)
-        res.status(200).json({
-            message: "Successfully logged in",
-            data: user
-        })
+        user.token = token
+        res.status(200).json(user)
     }else {
         res.status(400).json({
             message: "Invalid Credentials"

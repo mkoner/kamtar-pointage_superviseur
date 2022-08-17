@@ -10,61 +10,23 @@ const AppUser = function(user){
 }
 
 // get all users
-AppUser.getAllUsers = (result) =>{
-    dbConn.query('SELECT * FROM users', (err, res)=>{
-        if(err){
-            console.log('Error while fetching users', err);
-            result(null,err);
-        }else{
-            console.log('Users fetched successfully');
-            result(null,res);
-        }
-    })
+AppUser.getAllUsers = async() =>{
+    const result = await dbConn.promise().query('SELECT * FROM users')
+    return result[0]
 }
 
 // get all users by role
-AppUser.getUsersByRole = (role, result) =>{
-    dbConn.query('SELECT * FROM users WHERE role=?', role, (err, res)=>{
-         if(err){
-            console.log('Error while fetching users', err);
-            result(null,err);
-        }else{
-            console.log('Users fetched successfully');
-            result(null,res);
-        }
-    })
+AppUser.getUsersByRole = async(role) =>{
+    const result = await dbConn.promise().query('SELECT * FROM users WHERE role=?', role)
+    return result[0]
 }
 
 // get user by ID
-AppUser.getUserByID = (id, result)=>{
-    dbConn.query('SELECT * FROM users WHERE id=?', id, (err, res)=>{
-        if(err){
-            console.log('Error while fetching user by id', err);
-            throw err
-        }else{
-            return result(null, res);
-        }
-    })
-}
-
-// get user by ID
-AppUser.getUserByID1 = async(id)=>{
+AppUser.getUserByID = async(id)=>{
     const result = await dbConn.promise().query('SELECT * FROM users WHERE id=?', id)
     return result[0][0]
 }
 
-
-// get user by email
-/*AppUser.getUserByEmail = (email, result)=>{
-    dbConn.query('SELECT * FROM users WHERE email=?', email, (err, res)=>{
-        if(err){
-            console.log('Error while fetching user by email', err);
-            result(null, err);
-        }else{
-            result(null, res);
-        }
-    })
-}*/
 
 AppUser.getUserByEmail = async(email)=>{
     const result = await dbConn.promise().query('SELECT * FROM users WHERE email=?', email)
