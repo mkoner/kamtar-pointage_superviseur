@@ -1,0 +1,29 @@
+.mission-page{
+    margin: 2em auto;
+    padding: 2em;
+    background-color: #FFF;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .date-container{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .buttons{
+        margin: 2em;
+        display: flex;
+        justify-content: center;
+
+    }
+    
+    .date-label{
+        margin: 2em;
+        input{
+            margin-left: 1em;
+        }
+    }
+
+}

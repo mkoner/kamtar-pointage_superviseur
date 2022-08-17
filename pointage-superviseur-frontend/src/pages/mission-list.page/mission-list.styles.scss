@@ -1,0 +1,27 @@
+.missions{
+    table {
+        border-collapse: collapse;
+        margin: auto;
+      }
+
+      
+      table td, table th {
+        border: 1px solid #ddd;
+        padding: 8px;
+      }
+      
+      table tr:nth-child(even){background-color: #f2f2f2;}
+      
+      table tr:hover {
+        background-color: #437167;
+        color: #fff;
+        cursor: pointer;
+    }
+      
+      table th {
+        padding: 1rem;
+        text-align: center;
+        background-color: #26AD90;
+        color: white;
+      }
+}
