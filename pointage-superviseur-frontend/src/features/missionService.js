@@ -5,7 +5,7 @@ import { DEV_URL } from "../constants";
 //create mission
 const createMission = async (missionData, token) => {
   const config = {
-    Headers: {
+    headers: {
       Authorization: `Kamtar ${token}`,
     },
   };
@@ -14,31 +14,66 @@ const createMission = async (missionData, token) => {
   return response.data;
 };
 
-const getMissions = async (filters, token) => {
+const getAllMissions = async (token) => {
+  console.log("Called from service")
   const config = {
-    Headers: {
+    headers: {
       Authorization: `Kamtar ${token}`,
     },
   };
 
-  const response = await axios.get(`${DEV_URL}missions`, filters, config);
+  const response = await axios.get(`${DEV_URL}missions`, config);
+  return response.data;
+};
+
+const getAllMissionsByMonth = async (month, year,token) => {
+  const config = {
+    headers: {
+      Authorization: `Kamtar ${token}`,
+    },
+  };
+
+  const response = await axios.get(`${DEV_URL}missions/all/${month}/${year}`, config);
+  return response.data;
+};
+
+
+// Get missions by Sup
+const getMissionsBySup = async (id, token) => {
+  const config = {
+    headers: {
+      Authorization: `Kamtar ${token}`,
+    },
+  };
+  const response = await axios.get(`${DEV_URL}missions/superviseur/${id}`, config);
+  return response.data;
+};
+
+// Get missions by Sup
+const getMissionsBySupAndMonth = async (id, month, year, token) => {
+  const config = {
+    headers: {
+      Authorization: `Kamtar ${token}`,
+    },
+  };
+  const response = await axios.get(`${DEV_URL}missions/superviseur/${id}/${month}/${year}`, config);
   return response.data;
 };
 
 const getMissionById = async (id, token) => {
   const config = {
-    Headers: {
+    headers: {
       Authorization: `Kamtar ${token}`,
     },
   };
 
   const response = await axios.get(`${DEV_URL}missions/${id}`, config);
-  return response.data;
+  return response.data[0];
 };
 
 const updateMission = async (id, mission, token) => {
   const config = {
-    Headers: {
+    headers: {
       Authorization: `Kamtar ${token}`,
     },
   };
@@ -49,18 +84,19 @@ const updateMission = async (id, mission, token) => {
 
 const deleteMission = async (id, token) => {
   const config = {
-    Headers: {
+    headers: {
       Authorization: `Kamtar ${token}`,
     },
   };
 
-  const response = await axios.get(`${DEV_URL}missions/${id}`, config);
+  const response = await axios.delete(`${DEV_URL}missions/${id}`, config);
   return response.data;
 };
 
 const validateDate = async (id, reqBody, token) => {
+  console.log("validateDatecalled within missionService", id, reqBody, token)
   const config = {
-    Headers: {
+    headers: {
       Authorization: `Kamtar ${token}`,
     },
   };
@@ -69,20 +105,22 @@ const validateDate = async (id, reqBody, token) => {
   return response.data;
 };
 
-const finMission = async (id, reqBody, token) => {
+const finMission = async (id, token) => {
   const config = {
-    Headers: {
+    headers: {
       Authorization: `Kamtar ${token}`,
     },
   };
-
-  const response = await axios.put(`${DEV_URL}missions/fin/${id}`, reqBody, config);
+  const response = await axios.put(`${DEV_URL}missions/fin/${id}`, null, config);
   return response.data;
 };
 
 const MissionService = {
   createMission,
-  getMissions,
+  getAllMissions,
+  getAllMissionsByMonth,
+  getMissionsBySup,
+  getMissionsBySupAndMonth,
   getMissionById,
   updateMission,
   deleteMission,

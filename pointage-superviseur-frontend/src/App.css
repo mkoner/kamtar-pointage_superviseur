@@ -1,6 +1,9 @@
 .App {
-  text-align: center;
+  display: block;
+  background-color: #F9F9F9;
+  min-height: 100vh;
 }
+
 
 .App-logo {
   height: 40vmin;
@@ -11,6 +14,12 @@
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
+}
+
+.elements-container{
+  min-height: calc(100vh - 80px);
+  width: 100%;
+  margin: auto;
 }
 
 .App-header {
@@ -26,6 +35,59 @@
 
 .App-link {
   color: #61dafb;
+}
+
+a{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+Link{
+  text-decoration: none;
+}
+
+.fil{
+  margin-bottom: 50px;
+  padding-top: 33px;
+  color: #12131a;
+  font-size: 12px;
+}
+
+.fil>span>a:hover{
+  color: #26ad90;
+}
+
+h1 {
+  color: #26ad90;
+  font-family: "Varela Round", "Lato", sans-serif;
+  font-size: 1.5rem;
+  border-bottom: none;
+  margin-bottom: 30px;
+}
+
+.card-title {
+  font-family: "Varela Round", "Lato", sans-serif;
+  color: #26ad90;
+  font-size: 1.25rem;
+  font-weight: normal;
+  margin: 0px;
+}
+
+.btn-success {
+  background-color: #26ad90;
+  border-color: #26ad90;
+}
+
+.btn-add-new span, .btn-cancel a {
+  text-transform: none;
+  color: #ffffff;
+  font-size: 0.875rem;
+  margin-left: 5px;
+}
+
+.no-display{
+  display: none;
 }
 
 @keyframes App-logo-spin {

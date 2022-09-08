@@ -3,33 +3,38 @@ const MissionModel = require('../models/mission.model')
 
 // create new Mission
 exports.createMission = async (req, res) =>{
-    if(req.user.role != "Superviseur")
-    res.status(401).json({
-        success: false, 
-        message: "Missions should be crated by a Superviseur"
-    })
-    const missionTocreate = new MissionModel(req.body);
-    missionTocreate.date_creation = new Date()
-    missionTocreate.date_debut = new Date()
-    missionTocreate.sup_id = req.user.id
-    console.log('missionTocreate', missionTocreate);
-    // check null
-    if(req.body.constructor === Object && Object.keys(req.body).length === 0){
-        res.send(400).send({success: false, message: 'Please fill all fields'});
-    }else{
-        MissionModel.createMission(missionTocreate, (err, mission)=>{
-            if(mission.insertId)
-            res.status(200).json({
-                success: true, 
-                message: 'Mission Created Successfully', 
-                data: mission})
-            else
-            res.status(500).json({
-                success: false,
-                message: "Error while creating mission"
-            })
+    if (req.user.role != "Superviseur")
+        res.status(401).json({
+            success: false,
+            message: "Missions should be crated by a Superviseur"
         })
-    } 
+    else {
+        const missionTocreate = new MissionModel(req.body);
+        missionTocreate.date_creation = new Date()
+        missionTocreate.date_debut = new Date()
+        missionTocreate.sup_id = req.user.id
+        missionTocreate.nom_superviseur = req.user.prenom + " " + req.user.nom
+        missionTocreate.statut = "créé"
+        console.log('missionTocreate', missionTocreate);
+        // check null
+        if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
+            res.send(400).send({ success: false, message: 'Please fill all fields' });
+        } else {
+            MissionModel.createMission(missionTocreate, (err, mission) => {
+                if (mission.insertId)
+                    res.status(200).json({
+                        success: true,
+                        message: 'Mission Created Successfully',
+                        data: mission
+                    })
+                else
+                    res.status(500).json({
+                        success: false,
+                        message: "Error while creating mission"
+                    })
+            })
+        }
+    }
 }
 
 // get all missions
@@ -40,27 +45,44 @@ exports.getAllMissions = (req, res)=> {
             message: "Error getting missions"
         })
         console.log('missions', missions);
-        res.status(200).json({
-            succes: true,
-            message: "missions fetched",
-            data: missions
-        })
+        res.status(200).json(missions)
     })
 }
 
-// get missions by Sup and month
-exports.getMissionsBySupAndMonth = (req, res)=> {
-    MissionModel.getMissionBySup(req.body, (err, missions) =>{
+// get all missions by month
+exports.getAllMissionsByMonth = (req, res)=> {
+    MissionModel.getAllMissionsByMonth(req.params.month, req.params.year,(err, missions) =>{
         if(err)
         res.status(500).json({
             message: "Error getting missions"
         })
         console.log('missions', missions);
-        res.status(200).json({
-            succes: true,
-            message: "Missions fetched",
-            data: missions
+        res.status(200).json({ missions})
+    })
+}
+
+// get missions by Sup and month
+exports.getMissionsBySup = (req, res)=> {
+    MissionModel.getMissionsBySup(req.params.id, (err, missions) =>{
+        if(err)
+        res.status(500).json({
+            message: "Error getting missions"
         })
+        console.log('missions', missions);
+        res.status(200).json(missions)
+    })
+}
+
+// get missions by Sup and month
+exports.getMissionBySupAndMonth = (req, res) => {
+    console.log("getMissionsBySup called",req.params.i)
+    MissionModel.getMissionBySupAndMonth(req.params.id, req.params.month, req.params.year, (err, missions) =>{
+        if(err)
+        res.status(500).json({
+            message: "Error getting missions"
+        })
+        console.log('missions', missions);
+        res.status(200).json(missions)
     })
 }
 
@@ -72,23 +94,21 @@ exports.getMissionByID = (req, res)=>{
             message: "Error getting mission"
         })
         console.log('single mission data',mission);
-        res.status(200).json({
-            succes: true,
-            message: "mission fetched",
-            data: mission
-        });
+        res.status(200).json(mission);
     })
 }
 
 // Validate date
-exports.validateMissionDate = (req, res)=>{
+exports.validateMissionDate = (req, res) => {
+    console.log("validateMissionDate called", req.body) 
     console.log(req.user)
     if(req.user.role == "Superviseur")
        res.status(401).json({
         message: "You do not have enough permission"
        })
     else {
-    req.body.validePar = req.user.id
+        req.body.validePar = req.user.id
+        req.body.valideParPrenom = `${req.user.prenom} ${req.user.nom}`
     MissionModel.validateDate(req.params.id, req.body, (err, mission)=>{
         if(err)
         res.status(500).json({

@@ -4,9 +4,10 @@
     clear: both;
     width: 100%;
     margin-top: 2rem;
-    position:fixed;
+    position:sticky;
     bottom:0;
     left:0;
+    z-index: 100;
 
     img{
         height: 60px;

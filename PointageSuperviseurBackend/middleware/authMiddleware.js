@@ -2,7 +2,9 @@ const jwt = require('jsonwebtoken')
 const AppUser = require('../models/app-user.model')
 const asyncHandler = require('express-async-handler')
 
-const protect =  asyncHandler(async(req, res, next) => {
+const protect = asyncHandler(async (req, res, next) => {
+  console.log(req.headers)
+  console.log(req.body)
   let token;
 
   if (
@@ -30,6 +32,7 @@ const protect =  asyncHandler(async(req, res, next) => {
   }
 
   if (!token) {
+    console.log("No token passed")
     res.status(401)
     throw new Error('Not authorized, no token')
   }

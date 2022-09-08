@@ -2,9 +2,16 @@ import axios from "axios";
 
 import { DEV_URL } from "../constants";
 
+const user = JSON.parse(localStorage.getItem("user"));
+
 // Register user
-const createUser = async (userData) => {
-  const response = await axios.post(`${DEV_URL}users`, userData);
+const createUser = async (userData, token) => {
+  const config = {
+    headers: {
+      Authorization: `Kamtar ${token}`,
+    },
+  };
+  const response = await axios.post(`${DEV_URL}users`, userData, config);
   return response.data;
 };
 
@@ -25,21 +32,36 @@ const logout = () => {
 };
 
 // Get users by role
-const getUsersByRole = async (filters, token) => {
+const getUsersByRole = async (role, token) => {
   const config = {
-    Headers: {
+    headers: {
       Authorization: `Kamtar ${token}`,
     },
   };
 
-  const response = await axios.get(`${DEV_URL}users`, filters, config);
-  return response.data;
+  if (role == "Superviseur") {
+    const response = await axios.get(`${DEV_URL}users/superviseurs`, config);
+    return response.data;
+  }
+
+  if (role == "Manager") {
+    const response = await axios.get(`${DEV_URL}users/managers`, config);
+    return response.data;
+  }
+
+  if (role == "Admin") {
+    const response = await axios.get(`${DEV_URL}users/admins`, config);
+    return response.data;
+  }
+  
+
 };
 
 // Get all users
 const getAllUsers = async (token) => {
-  const config = {
-    Headers: {
+  console.log("getAllUsers called with token inside authService"+ token)
+  const config = { 
+    headers: {
       Authorization: `Kamtar ${token}`,
     },
   };
@@ -51,31 +73,39 @@ const getAllUsers = async (token) => {
 // Get user by id
 const getUserById = async (id, token) => {
   const config = {
-    Headers: {
+    headers: {
       Authorization: `Kamtar ${token}`,
     },
   };
 
-  const response = await axios.get(`${DEV_URL}users/${id}`, config);
+  const response = await axios.get(`${DEV_URL}users/user/${id}`, config);
+  return response.data;
+};
+
+// Get user by id1
+const getUserById1 = async (id) => {
+
+  const response = await axios.get(`${DEV_URL}users/byid1/${id}`);
   return response.data;
 };
 
 // Update user
 const updateUser = async (id, user, token) => {
+  console.log(user)
   const config = {
-    Headers: {
+    headers: {
       Authorization: `Kamtar ${token}`,
     },
   };
 
-  const response = await axios.put(`${DEV_URL}users/${id}`, user, config);
+  const response = await axios.put(`${DEV_URL}users/user/${id}`, user, config);
   return response.data;
 };
 
 // Update user password
 const updateUserPassword = async (id, password, token) => {
   const config = {
-    Headers: {
+    headers: {
       Authorization: `Kamtar ${token}`,
     },
   };
@@ -91,12 +121,12 @@ const updateUserPassword = async (id, password, token) => {
 // Delete User
 const deleteUser = async (id, token) => {
   const config = {
-    Headers: {
+    headers: {
       Authorization: `Kamtar ${token}`,
     },
   };
 
-  const response = await axios.delete(`${DEV_URL}users/${id}`, config);
+  const response = await axios.delete(`${DEV_URL}users/user/${id}`, config);
   return response.data;
 };
 
@@ -107,6 +137,7 @@ const authService = {
   getUsersByRole,
   getAllUsers,
   getUserById,
+  getUserById1,
   updateUser,
   updateUserPassword,
   deleteUser,

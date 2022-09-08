@@ -1,10 +1,42 @@
-.sign-in{
-    max-width: 500px;
-    text-align: center;
-    margin: auto; 
-    
-    .buttons{
-        display: flex;
-        justify-content: center;
-    }
-}
+
+      .container-scroller{
+        margin: auto;
+      }
+      #logo_center_bar {
+        -webkit-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.47);
+        box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.47);
+        width: 65px;
+        height: 65px;
+        margin: 0 auto;
+        border-radius: 5px;
+        z-index: 99;
+        background-color: #ffffff;
+      }
+
+      #logo_center_bar:hover {
+        -webkit-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.87);
+        box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.87);
+        cursor: pointer;
+      }
+
+      #logo_center_bar > img {
+        width: 65px;
+        height: 65px;
+        padding: 10px;
+      }
+
+      .h4-kamtar {
+        text-align: center;
+        color: #26ad90;
+      }
+
+      .login-btn{
+        background-color: #26ad90 !important;
+      }
+
+      .form-control:focus{
+        border: 1px solid #00c292 !important;
+        box-shadow: none !important;
+      } 
+
+      

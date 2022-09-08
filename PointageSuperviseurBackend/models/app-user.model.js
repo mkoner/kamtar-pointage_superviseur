@@ -6,8 +6,8 @@ const AppUser = function(user){
     this.nom = user.nom
     this.email = user.email
     this.role = user.role
-    this.is_active = true
-}
+    this.is_active = user.is_active
+} 
 
 // get all users
 AppUser.getAllUsers = async() =>{
@@ -17,7 +17,7 @@ AppUser.getAllUsers = async() =>{
 
 // get all users by role
 AppUser.getUsersByRole = async(role) =>{
-    const result = await dbConn.promise().query('SELECT * FROM users WHERE role=?', role)
+    const result = await dbConn.promise().query('SELECT * FROM users WHERE role=?', [role])
     return result[0]
 }
 
@@ -47,7 +47,8 @@ AppUser.createUser = (reqData, result) =>{
 }
 
 // update user
-AppUser.updateUser = (id, reqData, result)=>{
+AppUser.updateUser = (id, reqData, result) => {
+    console.log("Inside updateUser user model",reqData)
     reqData.update_date = new Date()
     dbConn.query("UPDATE users SET prenom=?, nom=?, email=?, role=?, update_date=?, is_active=? WHERE id = ?",
      [reqData.prenom, reqData.nom, reqData.email, reqData.role, reqData.update_date,reqData.is_active, id], (err, res)=>{

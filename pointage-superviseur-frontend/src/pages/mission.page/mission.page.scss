@@ -1,29 +1,26 @@
 .mission-page{
-    margin: 2em auto;
-    padding: 2em;
-    background-color: #FFF;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    width: 100%;
 
-    .date-container{
+
+    .info-debut, .info-fin, .info-mission{
+        max-width: 400px;
+        min-width: 300px;
+        background-color: #ffffff;
+        border-radius: 4px;
+        -webkit-box-shadow: -1px 4px 15px 1px rgb(0 0 0 / 20%);
+        box-shadow: -1px 4px 15px 1px rgb(0 0 0 / 20%);
+        padding: 20px;
+    }
+
+    .missions{
+        padding-bottom: 3rem;
+    }
+
+
+    .mission-card-2{
         display: flex;
-        flex-direction: column;
-        justify-content: center;
+        justify-content: start;
+        flex-flow: row wrap;
+        padding-bottom: 10rem;
     }
-
-    .buttons{
-        margin: 2em;
-        display: flex;
-        justify-content: center;
-
-    }
-    
-    .date-label{
-        margin: 2em;
-        input{
-            margin-left: 1em;
-        }
-    }
-
 }

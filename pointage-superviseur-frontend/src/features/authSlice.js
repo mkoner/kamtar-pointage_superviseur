@@ -7,10 +7,12 @@ const user = JSON.parse(localStorage.getItem("user"));
 const initialState = {
   loggedInUser: user ? user : null,
   users: [],
+  selectedUser: {},
   isError: false,
   isSuccess: false,
   isLoading: false,
   message: "",
+  created: false,
 };
 
 // Create user
@@ -18,7 +20,8 @@ export const createUser = createAsyncThunk(
   "auth/createUser",
   async (user, thunkAPI) => {
     try {
-      return await authService.createUser(user);
+      const token = thunkAPI.getState().auth.loggedInUser.token;
+      return await authService.createUser(user, token);
     } catch (error) {
       const message =
         (error.response &&
@@ -54,7 +57,9 @@ export const getUsersByRole = createAsyncThunk(
   "auth/getUsersByRole",
   async (role, thunkAPI) => {
     try {
-      return await authService.getUsersByRole(role);
+      const token = thunkAPI.getState().auth.loggedInUser.token;
+      console.log("getUsersByRole called within authSlice", role, token)
+      return await authService.getUsersByRole(role, token);
     } catch (error) {
       const message =
         (error.response &&
@@ -71,8 +76,11 @@ export const getUsersByRole = createAsyncThunk(
 export const getAllUsers = createAsyncThunk(
   "auth/getAllUsers",
   async (thunkAPI) => {
+    console.log(thunkAPI)
     try {
-      return await authService.getAllUsers();
+      const token = thunkAPI.getState().auth.loggedInUser.token;
+      console.log(token)
+      return await authService.getAllUsers(token);
     } catch (error) {
       const message =
         (error.response &&
@@ -90,7 +98,26 @@ export const getUserById = createAsyncThunk(
   "auth/getUserById",
   async (id, thunkAPI) => {
     try {
-      return await authService.getUserById(id);
+      const token = thunkAPI.getState().auth.loggedInUser.token;
+      return await authService.getUserById(id, token);
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get user by id1
+export const getUserById1 = createAsyncThunk(
+  "auth/getUserById1",
+  async (id, thunkAPI) => {
+    try {
+      return await authService.getUserById1(id);
     } catch (error) {
       const message =
         (error.response &&
@@ -106,9 +133,18 @@ export const getUserById = createAsyncThunk(
 // Update user
 export const updateUser = createAsyncThunk(
   "auth/updateUser",
-  async (id, user, thunkAPI) => {
+  async (user, thunkAPI) => {
     try {
-      return await authService.updateUser(id, user);
+      console.log(user)
+      const reqData = {
+        nom:user.nom,
+        prenom:user.prenom,
+        email:user.email,
+        is_active: user.is_active,
+        role: user.role
+      }
+      const token = thunkAPI.getState().auth.loggedInUser.token;
+      return await authService.updateUser(user.id, reqData, token);
     } catch (error) {
       const message =
         (error.response &&
@@ -126,7 +162,8 @@ export const updateUserPassword = createAsyncThunk(
   "auth/updateUserPassword",
   async (id, password, thunkAPI) => {
     try {
-      return await authService.updateUserPassword(id, password);
+      const token = thunkAPI.getState().auth.loggedInUser.token;
+      return await authService.updateUserPassword(id, password, token);
     } catch (error) {
       const message =
         (error.response &&
@@ -144,7 +181,8 @@ export const deleteUser = createAsyncThunk(
   "auth/deleteUser",
   async (id, thunkAPI) => {
     try {
-      return await authService.deleteUser(id);
+      const token = thunkAPI.getState().auth.loggedInUser.token;
+      return await authService.deleteUser(id, token);
     } catch (error) {
       const message =
         (error.response &&
@@ -166,6 +204,7 @@ export const authSlice = createSlice({
       state.isSuccess = false;
       state.isError = false;
       state.message = "";
+      state.created = false;
     },
   },
   extraReducers: (builder) => {
@@ -176,6 +215,7 @@ export const authSlice = createSlice({
       .addCase(createUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
+        state.created = true;
       })
       .addCase(createUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -231,9 +271,22 @@ export const authSlice = createSlice({
       .addCase(getUserById.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.users = action.payload;
+        state.selectedUser = action.payload;
       })
       .addCase(getUserById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      .addCase(getUserById1.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getUserById1.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.validePar = action.payload
+      })
+      .addCase(getUserById1.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;
@@ -244,7 +297,7 @@ export const authSlice = createSlice({
       .addCase(updateUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.users = action.payload;
+        state.selectedUser = action.payload;
       })
       .addCase(updateUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -257,7 +310,7 @@ export const authSlice = createSlice({
       .addCase(updateUserPassword.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.users = action.payload;
+        state.selectedUser = action.payload;
       })
       .addCase(updateUserPassword.rejected, (state, action) => {
         state.isLoading = false;
@@ -270,15 +323,15 @@ export const authSlice = createSlice({
       .addCase(deleteUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-          state.users = state.users.filter(
-            user => user.id != action.payload.id
-        )
+        state.users = state.users.filter(
+          (user) => user.id != action.payload.id
+        );
       })
       .addCase(deleteUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;
-      })
+      });
   },
 });
 

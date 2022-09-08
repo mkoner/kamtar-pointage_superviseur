@@ -15,18 +15,42 @@ exports.getAllUsers = asyncHandler(async (req, res)=> {
     })
 })
 
-// get Users by role
-exports.getUsersByRole = asyncHandler(async (req, res) => {
+// get Superviseurs
+exports.getSuperviseurs = async (req, res) => {
     if (req.user.role == "Manager" || req.user.role == "Admin") {
-        const users = await AppUserModel.getUsersByRole(req.body.role)
+        const users = await AppUserModel.getUsersByRole("Superviseur")
         res.status(200).json(users)
     }
     else
     res.status(401).json({
         message: "You do not have enough permission"
     })
-})
+}
 
+// get Manager
+exports.getManagers = async (req, res) => {
+    if (req.user.role == "Admin") {
+        const users = await AppUserModel.getUsersByRole("Manager")
+        res.status(200).json(users)
+    }
+    else
+    res.status(401).json({
+        message: "You do not have enough permission"
+    })
+}
+
+// get Manager
+exports.getAdmins = async (req, res) => {
+    if (req.user.role == "Admin") {
+        const users = await AppUserModel.getUsersByRole("Admin")
+        res.status(200).json(users)
+    }
+    else
+    res.status(401).json({
+        message: "You do not have enough permission"
+    })
+}
+ 
 // get User by ID
 exports.getUserByID = asyncHandler(async (req, res) => {
     console.log("getUserByID in controller called")
@@ -44,8 +68,18 @@ exports.getUserByID = asyncHandler(async (req, res) => {
     }
 })
 
+exports.getUserByID1 = asyncHandler(async (req, res) => {
+ 
+        const user = await AppUserModel.getUserByID(req.params.id)
+        if (!user) {
+            res.status(404)
+            throw new Error('No user with that id found')
+        }
+        res.status(200).json(user)
+})
+
 // create new User
-exports.createNewUser = async (req, res) =>{
+exports.createNewUser = async (req, res) => {
     //if(req.user.role == "Manager" || req.user.role == "Admin"){
     AppUserModel.getUserByEmail(req.body.email, (err, user)=>{
         if(user.lenght > 0)
@@ -59,6 +93,7 @@ exports.createNewUser = async (req, res) =>{
     const hashedPassword = await bcrypt.hash(req.body.password, salt)
     userTocreate.password = hashedPassword
     userTocreate.join_date = new Date()
+    userTocreate.is_active = true
     console.log('userTocreate', userTocreate);
     // check null
     if(req.body.constructor === Object && Object.keys(req.body).length === 0){
@@ -86,6 +121,7 @@ exports.createNewUser = async (req, res) =>{
 
 // User login
 exports.login = async (req, res) => {
+    console.log("Login called")
     const { email, password } = req.body
     const user = await AppUserModel.getUserByEmail(email)
 
@@ -103,7 +139,8 @@ exports.login = async (req, res) => {
 }
 
 // update User
-exports.updateUser = (req, res)=>{
+exports.updateUser = (req, res) => {
+    console.log("Inside controller", req.body)
     if(req.user.role == "Superviseur" && req.user.id != req.params.id)
     res.status(401).json({
         message: "You do not have enough permission"

@@ -11,6 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use('/api/v1/users', require('./routes/app-user.route'))
 app.use('/api/v1/missions', require('./routes/mission.route'))
+app.use('/api/v1/repports', require('./routes/repports.route'))
 app.use(errorHandler)
 
 

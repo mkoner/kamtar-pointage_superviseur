@@ -1,27 +1,25 @@
-.missions{
-    table {
-        border-collapse: collapse;
-        margin: auto;
-      }
+.missions-list{
+  width: 100%;
+  .missions-list-top{
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    margin: 2rem 0;
+  }
 
-      
-      table td, table th {
-        border: 1px solid #ddd;
-        padding: 8px;
-      }
-      
-      table tr:nth-child(even){background-color: #f2f2f2;}
-      
-      table tr:hover {
-        background-color: #437167;
-        color: #fff;
-        cursor: pointer;
+  .autocomplete{
+    margin: 2rem 0;
+  }
+
+  .rdt_TableBody{
+    &:hover{
+      cursor: pointer;
+      background-color: #26AD90;
     }
-      
-      table th {
-        padding: 1rem;
-        text-align: center;
-        background-color: #26AD90;
-        color: white;
-      }
+  }
+
+  a{
+    text-decoration: none;
+  }
+    
 }

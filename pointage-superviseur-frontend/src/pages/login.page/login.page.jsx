@@ -3,10 +3,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import { login, reset} from '../../features/authSlice'
+import logo from '../../assets/logo_picto.png'
 
-import CustomButton from "../../components/custom-button/custom-button.component";
-import FormInput from "../../components/form-input/forn-input.component";
+import { login, reset } from "../../features/authSlice";
 
 import "./login.page.scss";
 
@@ -21,7 +20,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { user, isLoading, isError, isSuccess, message } = useSelector(
+  const { loggedInUser, isLoading, isError, isSuccess, message } = useSelector(
     (state) => state.auth
   );
 
@@ -30,12 +29,12 @@ const LoginPage = () => {
       toast.error(message);
     }
 
-    if (isSuccess || user) {
+    if (isSuccess || loggedInUser) {
       navigate("/");
     }
 
     dispatch(reset());
-  }, [user, isError, isSuccess, message, navigate, dispatch]);
+  }, [loggedInUser, isError, isSuccess, message, navigate, dispatch]);
 
   const handleChange = (evt) => {
     const { name, value } = evt.target;
@@ -57,32 +56,73 @@ const LoginPage = () => {
   };
 
   if (isLoading) {
-    return <h4>Is Loading</h4>
+    return <h4>Is Loading</h4>;
   }
 
   return (
-    <div className="sign-in">
-      <form onSubmit={handleSubmit}>
-        <FormInput
-          name="email"
-          type="email"
-          handleChange={handleChange}
-          value={email}
-          label="email"
-          required
-        />
-        <FormInput
-          name="password"
-          type="password"
-          value={password}
-          handleChange={handleChange}
-          label="mot de passe"
-          required
-        />
-        <div className="buttons">
-          <CustomButton type="submit"> Se Connecter </CustomButton>
+    <div className="container-scroller">
+      <div className="container-fluid page-body-wrapper">
+        <div className="row">
+          <div style={{ padding: "20px", maxWidth: "400px", margin: "0 auto" }}>
+            <div id="logo_center_bar">
+              <img src={logo} />
+            </div>
+            <br />
+            <br />
+            <h4
+              className="h4-kamtar"
+              style={{ fontWeight: "bold", fontSize: "1.13rem" }}
+            >
+              Pointage Superviseur Connexion
+            </h4>
+            <form className="pt-5">
+              <div className="form-group">
+                <label
+                  htmlFor="email"
+                  data-i18n="account.email_or_telephone"
+                >
+                  Adresse e-mail*
+                </label>
+                <input
+                  value={email}
+                  onChange={handleChange}
+                  type="email"
+                  className="form-control"
+                  id="email_or_telephone"
+                  aria-describedby="emailHelp"
+                  name="email"
+                />
+                <i className="mdi mdi-account"></i>
+              </div>
+              <div className="form-group ">
+                <label htmlFor="password">Mot de passe*</label>
+                <input
+                  value={password}
+                  onChange={handleChange}
+                  type="password"
+                  className="form-control"
+                  id="password"
+                  name="password"
+                />
+              </div>
+              <div className="mt-5">
+                <input
+                  disabled={
+                    email.length == 0 ||
+                    password.length == 0 ||
+                    isLoading
+                  }
+                  type="button"
+                  onClick={handleSubmit}
+                  value={isLoading ? "Patientez..." : "Connexion"}
+                  className="btn btn-block btn-success btn-lg font-weight-medium login-btn"
+                  id="login"
+                />
+              </div>
+            </form>
+          </div>
         </div>
-      </form>
+      </div>
     </div>
   );
 };
