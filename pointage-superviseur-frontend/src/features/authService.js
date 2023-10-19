@@ -1,8 +1,10 @@
 import axios from "axios";
+import jwt_decode from "jwt-decode";
 
 import { DEV_URL } from "../constants";
 
 const user = JSON.parse(localStorage.getItem("user"));
+
 
 // Register user
 const createUser = async (userData, token) => {
@@ -19,11 +21,19 @@ const createUser = async (userData, token) => {
 const login = async (userData) => {
   const response = await axios.post(`${DEV_URL}users/login`, userData);
 
+ const token= response.headers.token
+  var decoded = jwt_decode(token);
+  
+  const user = await axios.get(`${DEV_URL}users/byid1/${decoded.id}`,);
+  
+  const user1 = user.data;
+  user1.token= token
+
   if (response.data) {
-    localStorage.setItem("user", JSON.stringify(response.data));
+    localStorage.setItem("user", JSON.stringify(user1));
   }
 
-  return response.data;
+  return user1;
 };
 
 // Logout user
@@ -59,7 +69,6 @@ const getUsersByRole = async (role, token) => {
 
 // Get all users
 const getAllUsers = async (token) => {
-  console.log("getAllUsers called with token inside authService"+ token)
   const config = { 
     headers: {
       Authorization: `Kamtar ${token}`,
@@ -91,7 +100,6 @@ const getUserById1 = async (id) => {
 
 // Update user
 const updateUser = async (id, user, token) => {
-  console.log(user)
   const config = {
     headers: {
       Authorization: `Kamtar ${token}`,

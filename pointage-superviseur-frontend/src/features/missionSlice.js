@@ -34,9 +34,7 @@ export const getAllMissions = createAsyncThunk(
   "missions/getAllMissions",
   async (_,thunkAPI) => {
     try {
-      console.log("Called from slice")
       const token = thunkAPI.getState().auth.loggedInUser.token;
-      console.log("token")
       return await missionService.getAllMissions(token);
     } catch (error) {
       const message =
@@ -144,7 +142,6 @@ export const updateMission = createAsyncThunk(
         nom_client: mission.client,
         code_operation: mission.codeOperation,
       }
-      console.log("missionSlice", reqData)
       const token = thunkAPI.getState().auth.loggedInUser.token;
       return await missionService.updateMission(mission.id, reqData, token);
     } catch (error) {

@@ -1,0 +1,91 @@
+.navigation-container{
+    display: flex;
+    flex-flow: column nowrap;
+    background-color: #fff;
+    text-align: left;
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 2% 1% 5% 3%;
+    font-size: 1rem;
+    font-weight: 400;
+    width: 22.5%; 
+    min-width: 250px;
+    max-width: 300px;
+    min-height: auto;
+    box-shadow: 5px 5px 5px  #888888;
+    z-index: 5000; 
+    
+}
+
+.navigation-top{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.close{
+    color: #26AD90;
+    font-size: 20px !important;
+    font-weight: bolder;
+}
+
+.close:hover{
+    color: #26AD90;
+}
+
+li{
+    list-style: none; 
+    font-size: 16px;
+    font-weight: 400,
+}
+
+ul{
+    margin: 10% 0;
+    padding: 0rem 0 0rem 1rem;
+}
+
+.nav-item:hover{
+    background-color: #26AD90;
+    cursor: pointer;
+    color: #fff;
+    border-radius: 0.2rem;
+}
+
+.nav-item{
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    padding-left: 0.5rem;
+}
+
+.nav-item-element{
+    margin: 0.5rem;
+}
+
+.bi{
+    color: #26AD90;
+    font-size: 1.5rem;
+}
+
+.nav-item:hover .bi{
+    color: #fff;
+}
+
+.no-display{
+    display: none;
+}
+
+.navigation-actions{
+    margin-top: 2rem;
+}
+
+.navigation-account{
+    margin-top: 2rem;
+}
+
+ul{
+    padding: 0;
+}

@@ -1,0 +1,21 @@
+.managers-list{
+  width: 100%;
+    .managers-list-top{
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: space-between;
+      margin: 2rem 0;
+    }
+  
+    .rdt_TableBody{
+      &:hover{
+        cursor: pointer;
+        background-color: #26AD90;
+      }
+    }
+  
+    a{
+      text-decoration: none;
+    }
+      
+  }

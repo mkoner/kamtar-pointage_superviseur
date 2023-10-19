@@ -1,0 +1,19 @@
+.repports-recap{
+    table{
+        border-collapse: collapse !important;
+        display: table;
+        border-collapse: separate;
+        box-sizing: border-box;
+        text-indent: initial;
+        border-spacing: 2px;
+        border-color: grey;
+    }
+    table, td, th {
+        border: 1px solid;
+      }
+
+      td{
+        text-align: right;
+        padding: 0 0.2rem;
+      }
+}

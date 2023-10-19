@@ -1,0 +1,43 @@
+.user-page{
+    width: 100%;
+
+
+    .info-personnelles{
+        max-width: 400px;
+        background-color: #ffffff;
+        border-radius: 4px;
+        -webkit-box-shadow: -1px 4px 15px 1px rgb(0 0 0 / 20%);
+        box-shadow: -1px 4px 15px 1px rgb(0 0 0 / 20%);
+        padding: 20px;
+    }
+
+    .missions{
+        padding-bottom: 3rem;
+    }
+    
+
+
+    input[type=radio]{ 
+            accent-color: green;   
+    }
+      
+
+
+
+    .active{
+        .radio-items{
+            display: flex;
+            flex-flow: row;
+            justify-content: center;
+    
+            .radio-item{
+                margin: 0 1rem;
+
+                label{
+                    margin: 0.5rem;
+                }
+            }
+        }
+    }
+
+}

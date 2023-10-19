@@ -1,5 +1,4 @@
 const dbConn = require('../config/db.config')
-const dayjs = require('dayjs')
 
 const Mission = function(mission){
     this.sup_id = mission.sup_id
@@ -26,8 +25,8 @@ const Mission = function(mission){
 
 // create mission
 Mission.createMission = (reqData, result) =>{
-    dbConn.query('INSERT INTO Missions SET ? ', reqData, (err, res)=>{
-        if(err){
+    dbConn.query('INSERT INTO missions SET ?', reqData, (err, res)=>{
+        if (err) {
             console.log('Error while inserting data');
             result(null, err);
         }else{
@@ -60,8 +59,6 @@ Mission.validateDate = async(id, reqData, result) => {
     if(reqData.type == "fin"){
     const mission = await Mission.getMissionByID1(id)
     const msToDay = 1000*60*60*24
-    console.log(mission)
-    console.log(reqData)
     reqData.date = new Date (reqData.date)
     //console.log(endOfMonth)
     reqData.date_fin_validation_date = new Date()
@@ -84,8 +81,6 @@ Mission.validateDate = async(id, reqData, result) => {
         }
         else{
             endOfMonth = new Date (mission.date_debut.getFullYear(), mission.date_debut.getMonth()+1, 1)
-            console.log(endOfMonth)
-            console.log(reqData.date_fin)
                 duree1 = Math.ceil((endOfMonth - mission.date_debut) / msToDay)
                 mois1 = mission.date_debut.getMonth()
                 annee1 = mission.date_debut.getFullYear()
@@ -142,7 +137,7 @@ Mission.updateMission = (id, reqData, result) =>{
 
 //get all missions
 Mission.getAllMissions = (result) =>{
-    dbConn.query('SELECT * FROM missions', (err, res)=>{
+    dbConn.query('SELECT * FROM missions ORDER BY date_creation DESC', (err, res)=>{
         if(err){
             console.log('Error while fetching Missions', err);
             result(null,err);
@@ -169,7 +164,7 @@ Mission.getAllMissionsByMonth = (month, year, result) => {
 
 //get all missions by sup
 Mission.getMissionsBySup = (id, result) => {
-    dbConn.query('SELECT * FROM missions WHERE sup_id=?',
+    dbConn.query('SELECT * FROM missions WHERE sup_id=? ORDER BY date_creation DESC',
         [id], (err, res) => {
         if(err){
             console.log('Error while fetching Missions', err);
@@ -179,6 +174,42 @@ Mission.getMissionsBySup = (id, result) => {
             result(null,res);
         }
     })
+}
+
+//get ongoing missions by sup
+Mission.getOngoingMissionsBySup = async(id) => {
+    try {
+        const result = await dbConn.promise().query(`SELECT * FROM missions WHERE statut IN 
+        ('créé','debut validé') AND sup_id=? ORDER BY date_creation DESC`,
+            id)
+        return result[0]
+    } catch (error) {
+         console.log(" Error getting ongoing missions by sup")
+    }
+}
+
+//get completed missions by sup
+Mission.getCompletedMissionsBySup = async(id) => {
+    try {
+        const result = await dbConn.promise().query(`SELECT * FROM missions WHERE 
+        statut IN ('terminé','terminé validé') AND sup_id=? ORDER BY date_creation DESC`,
+            id)
+        return result[0]
+    } catch (error) {
+        console.log("Error getting completed missions by Sup")
+    }
+}
+
+//get completed and validated missions by sup
+Mission.getCompletedAndValidatedMissionsBySup = async(id) => {
+    try {
+        const result = await dbConn.promise().query(`SELECT * FROM missions WHERE 
+        statut IN ('terminé validé') AND sup_id=? ORDER BY date_creation DESC`,
+            id)
+        return result[0]
+    } catch (error) {
+        console.log("Error getting completed and validated missions by Sup")
+    }
 }
 
 // get missions by supId and month

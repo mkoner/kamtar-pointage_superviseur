@@ -15,7 +15,6 @@ exports.createMission = async (req, res) =>{
         missionTocreate.sup_id = req.user.id
         missionTocreate.nom_superviseur = req.user.prenom + " " + req.user.nom
         missionTocreate.statut = "créé"
-        console.log('missionTocreate', missionTocreate);
         // check null
         if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
             res.send(400).send({ success: false, message: 'Please fill all fields' });
@@ -44,7 +43,6 @@ exports.getAllMissions = (req, res)=> {
         res.status(500).json({
             message: "Error getting missions"
         })
-        console.log('missions', missions);
         res.status(200).json(missions)
     })
 }
@@ -56,7 +54,6 @@ exports.getAllMissionsByMonth = (req, res)=> {
         res.status(500).json({
             message: "Error getting missions"
         })
-        console.log('missions', missions);
         res.status(200).json({ missions})
     })
 }
@@ -68,20 +65,17 @@ exports.getMissionsBySup = (req, res)=> {
         res.status(500).json({
             message: "Error getting missions"
         })
-        console.log('missions', missions);
         res.status(200).json(missions)
     })
 }
 
 // get missions by Sup and month
 exports.getMissionBySupAndMonth = (req, res) => {
-    console.log("getMissionsBySup called",req.params.i)
     MissionModel.getMissionBySupAndMonth(req.params.id, req.params.month, req.params.year, (err, missions) =>{
         if(err)
         res.status(500).json({
             message: "Error getting missions"
         })
-        console.log('missions', missions);
         res.status(200).json(missions)
     })
 }
@@ -93,15 +87,12 @@ exports.getMissionByID = (req, res)=>{
         res.status(500).json({
             message: "Error getting mission"
         })
-        console.log('single mission data',mission);
         res.status(200).json(mission);
     })
 }
 
 // Validate date
 exports.validateMissionDate = (req, res) => {
-    console.log("validateMissionDate called", req.body) 
-    console.log(req.user)
     if(req.user.role == "Superviseur")
        res.status(401).json({
         message: "You do not have enough permission"
@@ -121,9 +112,7 @@ exports.validateMissionDate = (req, res) => {
 
 // Set date de fin 
 exports.finDeMission = async(req, res)=>{
-    console.log(req.user)
     mission = await MissionModel.getMissionByID1(req.params.id)
-    console.log(mission)
     if(mission.sup_id != req.user.id)
     res.status(401).json({
         message: "You cannot set set date de fin to a mission you did not create"
@@ -165,4 +154,28 @@ exports.deleteMission = (req, res)=>{
         })
         res.status(200).json({success:true, message: 'User deleted successully!'});
     })
+}
+
+// Get ongoing missions by Sup
+exports.getOngoingMissionsBySup = async (req, res) => {
+    const { id } = req.params;
+    const missions = await MissionModel.getOngoingMissionsBySup(id)
+    missions ? res.status(200).json(missions) :
+        res.status(500).json("Error getting missions")
+}
+
+// Get completed missions by Sup
+exports.getCompletedMissionsBySup = async (req, res) => {
+    const { id } = req.params;
+    const missions = await MissionModel.getCompletedMissionsBySup(id)
+    missions ? res.status(200).json(missions) :
+        res.status(500).json("Error getting missions")
+}
+
+// Get completed and validated missions by Sup
+exports.getCompletedAndValidatedMissionsBySup = async (req, res) => {
+    const { id } = req.params;
+    const missions = await MissionModel.getCompletedAndValidatedMissionsBySup(id)
+    missions ? res.status(200).json(missions) :
+        res.status(500).json("Error getting missions")
 }

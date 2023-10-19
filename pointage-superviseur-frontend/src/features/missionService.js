@@ -15,7 +15,6 @@ const createMission = async (missionData, token) => {
 };
 
 const getAllMissions = async (token) => {
-  console.log("Called from service")
   const config = {
     headers: {
       Authorization: `Kamtar ${token}`,
@@ -94,7 +93,6 @@ const deleteMission = async (id, token) => {
 };
 
 const validateDate = async (id, reqBody, token) => {
-  console.log("validateDatecalled within missionService", id, reqBody, token)
   const config = {
     headers: {
       Authorization: `Kamtar ${token}`,

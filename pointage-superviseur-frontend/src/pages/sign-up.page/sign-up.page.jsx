@@ -11,18 +11,35 @@ import Navigation from "../navigation.page/navigation.page";
 import addIcon from "../../assets/icon-add-white.svg";
 
 import "./sign-up.page.scss";
+import Spinner from "../../components/spinner/spinner.component";
 
 const SignUpPage = ({ passedRole }) => {
   const [formData, setFormData] = useState({
     prenom: "",
     nom: "",
     email: "",
+    numero: "",
     password: "",
+    confirmedPassword: "",
     role: passedRole,
+    type: "",
+    numero2: "",
+    residence:"",
   });
   const [displayNav, setDisplayNav] = useState(false);
 
-  const { prenom, nom, email, password, role } = formData;
+  const {
+    prenom,
+    nom,
+    email,
+    password,
+    role,
+    numero,
+    type,
+    confirmedPassword,
+    numero2,
+    residence,
+  } = formData;
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -44,9 +61,14 @@ const SignUpPage = ({ passedRole }) => {
         nom: "",
         email: "",
         password: "",
+        confirmedPassword: "",
         role: passedRole,
+        type: "",
+        numero: "",
+        numero2: "",
+        residence:"",
       }));
-      toast.info("User Created");
+      toast.info(`${passedRole} créé`);
       navigate(`/${passedRole1}s`);
     }
 
@@ -64,29 +86,63 @@ const SignUpPage = ({ passedRole }) => {
   const handleSubmit = async (evt) => {
     evt.preventDefault();
 
+    if (!prenom || !nom || !numero) {
+      toast.error("Le prénom, le nom ou le numéro ne peuvent être vide");
+      return;
+    }
+
+    if (!(numero.replaceAll(" ", "").match('[0-9]{10}'))){
+      toast.error("Veillez enregistrer un numéro de 10 chiffres");
+      return;
+    }
+
+    if (email && !(email.replaceAll(" ", "").match("([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])"))){
+      toast.error("Verifier l'email");
+      
+      return;
+    }
+
+    if (passedRole == "Superviseur" && type == "") {
+      toast.error("Renseignez le statut du superviseur");
+      return;
+    }
+
+    if (password != confirmedPassword || password.length == 0) {
+      toast.error("Echec de confirmation du mot de passe");
+      return;
+    }
+
+
+
     const userData = {
       prenom,
       nom,
       email,
       password,
       role,
+      numero,
+      numero2,
+      type,
+      residence,
     };
+
+    userData.numero = numero.replaceAll(" ", "");
+    userData.numero2 = numero2.replaceAll(" ", "");
+    userData.email = email.length > 1 ? email.replaceAll(" ", "") : null;
 
     await dispatch(createUser(userData));
   };
 
   const handleClickOpen = () => {
     setDisplayNav(true);
-    console.log(displayNav);
   };
 
   const handleClickClose = () => {
     setDisplayNav(false);
-    console.log(displayNav);
   };
 
   if (isLoading) {
-    return <h4>Is Loading</h4>;
+    return <Spinner />;
   }
 
   return (
@@ -134,6 +190,7 @@ const SignUpPage = ({ passedRole }) => {
                     id="prenom"
                     name="prenom"
                     placeholder="Entrer prénom(s)"
+                    required
                   />
                 </div>
               </div>
@@ -148,9 +205,60 @@ const SignUpPage = ({ passedRole }) => {
                     className="form-control"
                     name="nom"
                     placeholder="Entrer le nom"
+                    required
                   />
                 </div>
               </div>
+
+              <div className="form-group form-item">
+                <label className="col-form-label">Numéro de téléphone*</label>
+                <div>
+                  <input
+                    value={numero}
+                    onChange={handleChange}
+                    type="tel"
+                    className="form-control"
+                    placeholder="Entrer le numéro de téléphone"
+                    name="numero"
+                    pattern="[0-9]{10}"
+                    required
+                  />
+                </div>
+              </div>
+
+              {passedRole == "Superviseur" && (
+                <div className="form-group form-item">
+                  <label className="col-form-label">
+                    Numéro de téléphone 2
+                  </label>
+                  <div>
+                    <input
+                      value={numero2}
+                      onChange={handleChange}
+                      type="text"
+                      className="form-control"
+                      placeholder="Entrer un contact secondaire"
+                      name="numero2"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {passedRole == "Superviseur" && (
+                <div className="form-group form-item">
+                  <label className="col-form-label">Lieu de résidence</label>
+                  <div>
+                    <input
+                      value={residence}
+                      onChange={handleChange}
+                      type="text"
+                      className="form-control"
+                      placeholder="Entrez le lieu de residence"
+                      name="residence"
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="form-group form-item">
                 <label className="col-form-label">Addresse Email</label>
@@ -158,11 +266,33 @@ const SignUpPage = ({ passedRole }) => {
                   <input
                     value={email}
                     onChange={handleChange}
-                    type="email"
+                    type="text"
                     className="form-control"
                     placeholder="Entrer l'address Email"
                     name="email"
                   />
+                </div>
+              </div>
+
+              <div
+                className={`form-group form-item ${
+                  passedRole != "Superviseur" ? "no-display" : ""
+                }`}
+              >
+                <label className="col-form-label">Statut*</label>
+                <div>
+                  <select
+                    name="type"
+                    className="form-control"
+                    onChange={handleChange}
+                    required={passedRole == "Superviseur"}
+                    value={type}
+                  >
+                    <option value=""></option>
+                    <option value="interne">Interne</option>
+                    <option value="externe">Externe</option>
+                    <option value="contractuel">Contractuel</option>
+                  </select>
                 </div>
               </div>
 
@@ -177,6 +307,25 @@ const SignUpPage = ({ passedRole }) => {
                     id="password"
                     name="password"
                     placeholder="Créer un mot de passe"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group form-item">
+                <label className="col-form-label">
+                  Confirmer Mot de Passe*
+                </label>
+                <div>
+                  <input
+                    value={confirmedPassword}
+                    onChange={handleChange}
+                    type="password"
+                    className="form-control"
+                    id="password1"
+                    name="confirmedPassword"
+                    placeholder="Confirmer le mot de passe"
+                    required
                   />
                 </div>
               </div>
@@ -187,7 +336,7 @@ const SignUpPage = ({ passedRole }) => {
               className="btn btn-primary btn-success btn-add-new add-user mt-4"
               onClick={handleSubmit}
               disabled={
-                email.length == 0 ||
+                numero.length == 0 ||
                 password.length == 0 ||
                 nom.length == 0 ||
                 prenom.length == 0

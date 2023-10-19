@@ -1,8 +1,19 @@
 .mission-page{
     width: 100%;
 
+    .mission-cards{
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: left;
+        gap: 10px;
+    }
 
-    .info-debut, .info-fin, .info-mission{
+    .mission-info-btn{
+        flex:1;
+    }
+
+
+   .info-mission{
         max-width: 400px;
         min-width: 300px;
         background-color: #ffffff;
@@ -16,11 +27,31 @@
         padding-bottom: 3rem;
     }
 
+    .commentDiv{
+        background-color: #ffffff;
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        max-width: 600px;
+    }
 
-    .mission-card-2{
-        display: flex;
-        justify-content: start;
-        flex-flow: row wrap;
-        padding-bottom: 10rem;
+    .responsDiv{
+        background-color: #ffffff;
+        margin-top: 0.5rem;
+        margin-left: 5%;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        max-width: 500px;
+    }
+
+    .commented-by{
+        font-weight: bold;
+    }
+    .respond{
+        padding-left: 1.1rem;
+        font-size: 0.7rem;
+    }
+    .respond:hover{
+        cursor: pointer;
     }
 }

@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { confirmAlert } from "react-confirm-alert"; // Import
+import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 // date library
 import moment from "moment";
+import { toast } from "react-toastify";
 
 import {
   reset,
@@ -13,13 +16,24 @@ import {
   finMission,
 } from "../../features/missionSlice";
 
+import {
+  getCommentsByMission,
+  getCommentById,
+  respondToComment,
+  createComment,
+  deleteComment,
+  resetComments,
+} from "../../features/commentSlice";
+
 import Navigation from "../navigation.page/navigation.page";
 import Logo from "../../components/logo/logo";
 
 import modifyIcon from "../../assets/pen-white.svg";
 import validateIcon from "../../assets/validate_white.svg";
+import addIcon from "../../assets/icon-add-white.svg";
 
 import "./mission.page.scss";
+import Spinner from "../../components/spinner/spinner.component";
 
 const MissionPage = () => {
   const { id } = useParams();
@@ -31,6 +45,17 @@ const MissionPage = () => {
     (state) => state.missions
   );
 
+  const userMessage = useSelector((state) => state.auth.message);
+
+  const {
+    comments,
+    selectedComment,
+    isCommentsError,
+    commentsMessage,
+    isCommentsSuccess,
+    isCommentsLoading,
+  } = useSelector((state) => state.comments);
+
   const [missionData, setMissionData] = useState({
     dateDebut: "",
     dateFin: "",
@@ -38,23 +63,29 @@ const MissionPage = () => {
     codeOperation: "",
   });
 
+  const [myComment, setMyComment] = useState("");
+  const [selectedId, setSelectedId] = useState("");
+
   const [displayNav, setDisplayNav] = useState(false);
 
   useEffect(() => {
     if (isError) {
-      console.log(message);
+      toast.error(message);
     }
 
-    if (!loggedInUser) {
+    if (!loggedInUser || userMessage == "Not authorized") {
       navigate("/login");
     }
+    if (loggedInUser) {
+      dispatch(getMissionById(id));
 
-    dispatch(getMissionById(id));
+      dispatch(getCommentsByMission(id));
+    }
 
     return () => {
       dispatch(reset());
     };
-  }, [loggedInUser, navigate, isError, message, id]);
+  }, [loggedInUser, navigate, isError, message, id, dispatch]);
 
   useEffect(() => {
     setMissionData((prevState) => ({
@@ -92,35 +123,81 @@ const MissionPage = () => {
       type: "fin",
       date: missionData.dateFin,
     };
+    if (data.date == null) {
+      toast.error("Reinseigner la date de fin");
+      return;
+    }
     await dispatch(validateDate(data));
     await dispatch(getMissionById(id));
   };
 
   const finDeMission = async (evt) => {
     evt.preventDefault();
-    await dispatch(finMission(id));
-    await dispatch(getMissionById(id));
+
+    confirmAlert({
+      title: "Confirmer Fin de mission ",
+      message: "Voulez-vous vraiment mettre fin à cette mission?",
+      buttons: [
+        {
+          label: "OUI",
+          onClick: async () => {
+            await dispatch(finMission(id));
+            await dispatch(getMissionById(id));
+          },
+        },
+        {
+          label: "NON",
+          onClick: () => console.log("No"),
+        },
+      ],
+    });
   };
 
   const handleUpdateMission = async (evt) => {
     evt.preventDefault();
-    console.log("Update mission called");
 
     const data = {
       id: id,
       client: missionData.client,
       codeOperation: missionData.codeOperation,
     };
-    console.log("Mission page", data);
+
     await dispatch(updateMission(data));
     await dispatch(getMissionById(id));
   };
 
-  if (isLoading) {
-    return <h4>Loading</h4>;
-  }
+  const addComment = async (evt) => {
+    evt.preventDefault();
+    const data = {
+      mission_id: id,
+      message: myComment,
+    };
+    if (data.message.length < 1) return;
+    await dispatch(createComment(data));
+    document.getElementById("closeModal").click();
+    dispatch(getCommentsByMission(id));
+    await dispatch(getMissionById(id));
+  };
 
-  console.log(missionData);
+  const respondToTheComment = async () => {
+    const data = {
+      id: selectedId,
+      response: myComment,
+    };
+
+    if (data.response.length < 1) return;
+    await dispatch(respondToComment(data));
+    document.getElementById("closeModal1").click();
+    if (isCommentsError) {
+      toast.error(commentsMessage);
+    }
+    dispatch(getCommentsByMission(id));
+    await dispatch(getMissionById(id));
+  };
+
+  if (isLoading) {
+    return <Spinner />;
+  }
 
   const dateDebutDisplay = selectedMission.date_debut
     ? moment(missionData.dateDebut).format("YYYY-MM-DD")
@@ -137,12 +214,10 @@ const MissionPage = () => {
 
   const handleClickOpen = () => {
     setDisplayNav(true);
-    console.log(displayNav);
   };
 
   const handleClickClose = () => {
     setDisplayNav(false);
-    console.log(displayNav);
   };
 
   return (
@@ -192,8 +267,8 @@ const MissionPage = () => {
         </div>
 
         <div className="mission-cards">
-          <div className="mission-info-btn">
-            <div className="info-mission user-page-section mb-2 mt-4">
+          <div className="mission-info-btn mt-4">
+            <div className="info-mission user-page-section">
               <h4 className="card-title">Info de Mission</h4>
               <div className="input-fields">
                 <div className="form-group form-item">
@@ -250,7 +325,7 @@ const MissionPage = () => {
               </div>
             </div>
             <div
-              className="btn btn-primary btn-success btn-add-new add-user mt-4"
+              className="btn btn-primary btn-success btn-add-new add-user mt-2"
               onClick={handleUpdateMission}
             >
               <img src={modifyIcon} alt="add icon" />
@@ -258,8 +333,8 @@ const MissionPage = () => {
             </div>
           </div>
 
-          <div className="mission-card-2">
-            <div className="info-debut user-page-section mb-2 mt-4 mr-4">
+          <div className="mission-info-btn mt-4">
+            <div className="info-mission user-page-section">
               <h4 className="card-title">Début de Mission</h4>
               <div className="input-fields">
                 <div className="form-group form-item">
@@ -273,15 +348,6 @@ const MissionPage = () => {
                       className="form-control"
                     />
                   </div>
-                  <div
-                    className={`btn btn-primary btn-success btn-add-new add-user mt-2 ${
-                      loggedInUser.role == "Superviseur" ? "no-display" : ""
-                    }`}
-                    onClick={validateDateBebut}
-                  >
-                    <img src={validateIcon} alt="add icon" />
-                    <span>Valider Début</span>
-                  </div>
                 </div>
 
                 <div className="form-group form-item">
@@ -292,6 +358,7 @@ const MissionPage = () => {
                       value={selectedMission.date_debut_valide_par_prenom}
                       name="validePar"
                       className="form-control"
+                      disabled
                     />
                   </div>
                 </div>
@@ -304,13 +371,26 @@ const MissionPage = () => {
                       value={dateDebutValide}
                       name="dateValidation"
                       className="form-control"
+                      disabled
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="info-fin user-page-section mb-2 mt-4 ml-4">
+            <div
+              className={`btn btn-primary btn-success btn-add-new add-user mt-2 ${
+                loggedInUser.role == "Superviseur" ? "no-display" : ""
+              }`}
+              onClick={validateDateBebut}
+            >
+              <img src={validateIcon} alt="add icon" />
+              <span>Valider Début</span>
+            </div>
+          </div>
+
+          <div className="mission-info-btn mt-4">
+            <div className="info-mission user-page-section">
               <h4 className="card-title">Fin de Mission</h4>
               <div className="input-fields">
                 <div className="form-group form-item">
@@ -324,15 +404,6 @@ const MissionPage = () => {
                       className="form-control"
                     />
                   </div>
-                  <div
-                    className={`btn btn-primary btn-success btn-add-new add-user mt-2 ${
-                      loggedInUser.role == "Superviseur" ? "no-display" : ""
-                    }`}
-                    onClick={validateDateFin}
-                  >
-                    <img src={validateIcon} alt="add icon" />
-                    <span>Valider Fin</span>
-                  </div>
                 </div>
 
                 <div className="form-group form-item">
@@ -343,6 +414,7 @@ const MissionPage = () => {
                       value={selectedMission.date_fin_valide_par_prenom}
                       name="validePar"
                       className="form-control"
+                      disabled
                     />
                   </div>
                 </div>
@@ -355,11 +427,166 @@ const MissionPage = () => {
                       value={dateFinValide}
                       name="dateValidation"
                       className="form-control"
+                      disabled
                     />
                   </div>
                 </div>
               </div>
             </div>
+
+            <div
+              className={`btn btn-primary btn-success btn-add-new add-user mt-2 ${
+                loggedInUser.role == "Superviseur" ? "no-display" : ""
+              }`}
+              onClick={validateDateFin}
+            >
+              <img src={validateIcon} alt="add icon" />
+              <span>Valider Fin</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="comments mt-4">
+          <div
+            className="btn btn-success"
+            data-bs-toggle="modal"
+            data-bs-target="#myModal"
+          >
+            <img src={""} alt="add icon" />
+            <span>Ajouter un commentaire</span>
+          </div>
+
+          <div
+            className="modal fade"
+            id="myModal"
+            tabindex="-1"
+            aria-labelledby="exampleModalLabel"
+            aria-hidden="true"
+          >
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title" id="exampleModalLabel">
+                    Entrez votre commentaire
+                  </h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <div className="form-group">
+                    <textarea
+                      className="form-control"
+                      onChange={(evt) => setMyComment(evt.target.value)}
+                      rows="3"
+                    ></textarea>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    id="closeModal"
+                    data-bs-dismiss="modal"
+                  >
+                    Fermer
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-success"
+                    onClick={addComment}
+                  >
+                    Enregistrer
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="modal fade"
+            id="myModal1"
+            tabindex="-1"
+            aria-labelledby="exampleModalLabel"
+            aria-hidden="true"
+          >
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title" id="exampleModalLabel">
+                    Entrer votre réponse
+                  </h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <div className="form-group">
+                    <textarea
+                      className="form-control"
+                      onChange={(evt) => setMyComment(evt.target.value)}
+                      rows="3"
+                    ></textarea>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    id="closeModal1"
+                    data-bs-dismiss="modal"
+                  >
+                    Fermer
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-success"
+                    onClick={respondToTheComment}
+                  >
+                    Enregistrer
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="commentsDisplay">
+            {comments.map((comment) => (
+              <div className="commentContainer">
+                <div className="commentDiv">
+                  <div className="commented-by">
+                    {comment.commented_by_display}
+                  </div>
+                  <div className="comment">{comment.message}</div>
+                </div>
+                {!comment.response && (
+                  <div>
+                    <span
+                      className="respond"
+                      data-bs-toggle="modal"
+                      data-bs-target="#myModal1"
+                      onClick={() => setSelectedId(comment.id)}
+                    >
+                      Répondre
+                    </span>
+                  </div>
+                )}
+                {comment.response && (
+                  <div className="responsDiv">
+                    <div className="commented-by">
+                      {comment.responded_by_display}
+                    </div>
+                    <div className="comment">{comment.response}</div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>

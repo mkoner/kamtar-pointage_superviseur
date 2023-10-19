@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import logo from '../../assets/logo_picto.png'
+import Spinner from "../../components/spinner/spinner.component";
 
 import { login, reset } from "../../features/authSlice";
 
@@ -11,11 +12,11 @@ import "./login.page.scss";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",
     password: "",
   });
 
-  const { email, password } = formData;
+  const { username, password } = formData;
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -25,11 +26,11 @@ const LoginPage = () => {
   );
 
   useEffect(() => {
-    if (isError) {
+   if (isError) {
       toast.error(message);
-    }
+    } 
 
-    if (isSuccess || loggedInUser) {
+    if (isSuccess) {
       navigate("/");
     }
 
@@ -48,7 +49,7 @@ const LoginPage = () => {
     evt.preventDefault();
 
     const userData = {
-      email,
+      username,
       password,
     };
 
@@ -56,7 +57,7 @@ const LoginPage = () => {
   };
 
   if (isLoading) {
-    return <h4>Is Loading</h4>;
+    return <Spinner/>
   }
 
   return (
@@ -81,16 +82,17 @@ const LoginPage = () => {
                   htmlFor="email"
                   data-i18n="account.email_or_telephone"
                 >
-                  Adresse e-mail*
+                  Adresse e-mail / numéro de telephone*
                 </label>
                 <input
-                  value={email}
+                  value={username}
                   onChange={handleChange}
-                  type="email"
+                  type="text"
                   className="form-control"
                   id="email_or_telephone"
                   aria-describedby="emailHelp"
-                  name="email"
+                  name="username"
+                  required
                 />
                 <i className="mdi mdi-account"></i>
               </div>
@@ -108,7 +110,7 @@ const LoginPage = () => {
               <div className="mt-5">
                 <input
                   disabled={
-                    email.length == 0 ||
+                    username.length == 0 ||
                     password.length == 0 ||
                     isLoading
                   }

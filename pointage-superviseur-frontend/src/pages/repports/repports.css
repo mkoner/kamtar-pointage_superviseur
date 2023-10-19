@@ -1,0 +1,10 @@
+@import "rsuite/dist/rsuite.css";
+
+.date-picker{
+    color:  #26AD90 !important;
+    margin: 1rem 0;
+}
+
+.h4-repports{
+    text-align: left;
+}

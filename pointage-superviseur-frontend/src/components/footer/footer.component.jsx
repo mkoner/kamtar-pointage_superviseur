@@ -1,5 +1,5 @@
 
-import  Logo from '../../assets/splash.png'
+import  Logo from '../../assets/logo-noir.png'
 
 import './footer.styles.scss'
 

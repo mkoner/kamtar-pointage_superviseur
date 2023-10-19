@@ -1,0 +1,24 @@
+.home-page{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: bold;
+    margin: auto;
+    min-height: 100vh;
+
+    ul{
+        &>li{
+            list-style: none;
+            color: #00c292;
+        }
+    }
+
+    .itemss{
+        margin-top: 60px;
+        display: flex;
+        flex-flow: row wrap;
+        padding-bottom: 60px;
+    }
+}

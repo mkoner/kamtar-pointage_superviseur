@@ -1,0 +1,16 @@
+.create-mission{
+    padding: 3rem;
+    text-align: center;
+    width: 100%;
+    display: flex;
+    flex-direction: column ;
+    justify-content: center;
+    max-width: 400px;
+    margin: auto;
+
+    form{
+    display: flex;
+    flex-direction: column ;
+    justify-content: center;
+    }
+}

@@ -2,6 +2,7 @@
   display: block;
   background-color: #F9F9F9;
   min-height: 100vh;
+  font-family: "Lato", sans-serif;
 }
 
 
@@ -52,6 +53,7 @@ Link{
   padding-top: 33px;
   color: #12131a;
   font-size: 12px;
+  margin-left: 80px;
 }
 
 .fil>span>a:hover{

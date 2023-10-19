@@ -3,8 +3,6 @@ const AppUser = require('../models/app-user.model')
 const asyncHandler = require('express-async-handler')
 
 const protect = asyncHandler(async (req, res, next) => {
-  console.log(req.headers)
-  console.log(req.body)
   let token;
 
   if (
@@ -20,8 +18,7 @@ const protect = asyncHandler(async (req, res, next) => {
 
       // Get user from the token
       
-      req.user  = await AppUser.getUserByID(decoded.id)
-    
+      req.user = await AppUser.getUserByID(decoded.id)
 
       next()
     } catch (error) {

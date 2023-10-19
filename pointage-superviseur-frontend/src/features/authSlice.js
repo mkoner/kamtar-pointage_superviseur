@@ -38,6 +38,7 @@ export const createUser = createAsyncThunk(
 export const login = createAsyncThunk("auth/login", async (user, thunkAPI) => {
   try {
     return await authService.login(user);
+     
   } catch (error) {
     const message =
       (error.response && error.response.data && error.response.data.message) ||
@@ -58,7 +59,6 @@ export const getUsersByRole = createAsyncThunk(
   async (role, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.loggedInUser.token;
-      console.log("getUsersByRole called within authSlice", role, token)
       return await authService.getUsersByRole(role, token);
     } catch (error) {
       const message =
@@ -76,10 +76,8 @@ export const getUsersByRole = createAsyncThunk(
 export const getAllUsers = createAsyncThunk(
   "auth/getAllUsers",
   async (thunkAPI) => {
-    console.log(thunkAPI)
     try {
       const token = thunkAPI.getState().auth.loggedInUser.token;
-      console.log(token)
       return await authService.getAllUsers(token);
     } catch (error) {
       const message =
@@ -135,12 +133,16 @@ export const updateUser = createAsyncThunk(
   "auth/updateUser",
   async (user, thunkAPI) => {
     try {
-      console.log(user)
       const reqData = {
         nom:user.nom,
         prenom:user.prenom,
-        email:user.email,
+        email: user.email,
+        type: user.type,
+        numero: user.numero,
+        numero2: user.numero2,
+        password: user.password,
         is_active: user.is_active,
+        residence: user.residence,
         role: user.role
       }
       const token = thunkAPI.getState().auth.loggedInUser.token;
@@ -160,10 +162,13 @@ export const updateUser = createAsyncThunk(
 // Update user password
 export const updateUserPassword = createAsyncThunk(
   "auth/updateUserPassword",
-  async (id, password, thunkAPI) => {
+  async (data, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.loggedInUser.token;
-      return await authService.updateUserPassword(id, password, token);
+      const reqData = {
+        password: data.password
+      }
+      return await authService.updateUserPassword(data.id, reqData, token);
     } catch (error) {
       const message =
         (error.response &&
@@ -175,6 +180,7 @@ export const updateUserPassword = createAsyncThunk(
     }
   }
 );
+
 
 // Delete user
 export const deleteUser = createAsyncThunk(

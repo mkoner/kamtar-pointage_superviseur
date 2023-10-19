@@ -3,6 +3,9 @@ import { useNavigate, Outlet, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { ReactSearchAutocomplete } from "react-search-autocomplete";
 import MaterialReactTable from 'material-react-table';
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+import { toast } from "react-toastify";
 
 
 import missionSlice, {
@@ -23,27 +26,34 @@ import deleteIcon from "../../assets/delete.svg";
 import addIcon from "../../assets/icon-add-white.svg";
 
 import "./mission-list.styles.scss";
+import Spinner from "../../components/spinner/spinner.component";
+import CustomButton from "../../components/custom-button/custom-button.component";;
 
 function MissionList() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 20,
+  });
+
   const { loggedInUser, users } = useSelector((state) => state.auth);
+  const userMessage = useSelector((state)=>state.auth.message)
   const { missions, selectedMission, isLoading, isError, message } =
     useSelector((state) => state.missions);
 
   useEffect(() => {
-    if (isError) {
-      console.log(message);
-    }
-
-    if (!loggedInUser) {
+    if (isError)
+      toast.error(message)
+    
+    if (!loggedInUser || userMessage == "Not authorized") {
       navigate("/login");
     }
 
-    if (loggedInUser.role == "Superviseur") {
+    if (loggedInUser && loggedInUser.role == "Superviseur") {
       dispatch(  getMissionsBySup(loggedInUser.id));
-    } else {
+    } else if (loggedInUser && loggedInUser.role != "Superviseur"){
       dispatch(getAllMissions());
     }
 
@@ -52,12 +62,25 @@ function MissionList() {
     return () => {
       dispatch(reset());
     };
-  }, [loggedInUser, isError, message, dispatch]);
+  }, [loggedInUser, message, dispatch]);
 
 
   const handleDelete = (id) => {
-    console.log("delete user", id);
-    dispatch(deleteMission(id));
+    confirmAlert({
+      title: 'Confirmer suppression ',
+      message: 'Voulez-vous vraiment supprimer cette mission?',
+      buttons: [
+        {
+          label: 'OUI',
+          onClick: () => dispatch(deleteMission(id))
+        },
+        {
+          label: 'NON',
+          onClick: () => console.log("No")
+        }
+      ]
+    });
+
   };
 
 
@@ -71,8 +94,7 @@ function MissionList() {
         maxSize: 10,
         accessorFn: (row) => row.id,
         sortable: true,
-        muiTableHeadCellFilterTextFieldProps: { placeholder: '' },
-        enableColumnFilter: false, 
+        muiTableHeadCellFilterTextFieldProps: { placeholder: '' }, 
        
       },
       {
@@ -86,6 +108,13 @@ function MissionList() {
         accessorFn: (row) => row.nom_client,
         sortable: true,
         muiTableHeadCellFilterTextFieldProps: { placeholder: '' },
+      },
+      {
+        header: "Opération",
+        accessorFn: (row) => row.code_operation,
+        sortable: true,
+        muiTableHeadCellFilterTextFieldProps: { placeholder: '' },
+        maxSize: 10,
       },
       {
         header: "Statut",
@@ -106,7 +135,7 @@ function MissionList() {
         header: "Date début",
         accessorFn: (row) => (row.date_debut ? new Date(row.date_debut).toLocaleDateString():""),
         sortable: true,
-        enableColumnFilter: false, 
+        muiTableHeadCellFilterTextFieldProps: { placeholder: '' },
         size: 20,
         minSize: 10, 
         maxSize: 30,
@@ -130,9 +159,9 @@ function MissionList() {
         header: "Date fin",
         accessorFn: (row) => (row.date_fin ? new Date(row.date_fin).toLocaleDateString(): ""),
         sortable: true,
-        enableColumnFilter: false,  
+        muiTableHeadCellFilterTextFieldProps: { placeholder: '' },  
         size: 20,
-        minSize: 10, 
+        minSize: 10,
         maxSize: 30,
       },
       {
@@ -161,7 +190,7 @@ function MissionList() {
             src={deleteIcon}
             alt="delete icon"
             height="20px"
-            onClick={() => handleDelete(cell.getValue())}
+            onClick={(evt) => { handleDelete(cell.getValue())}}
           />
         ),
 
@@ -178,15 +207,16 @@ function MissionList() {
 
   const handleClickOpen = () => {
     setDisplayNav(true);
-    console.log(displayNav);
   };
 
   const handleClickClose = () => {
     setDisplayNav(false);
-    console.log(displayNav);
   };
 
-  return (
+  if (isLoading) {
+    return <Spinner/>
+  }
+return (
     <div className="missions-list">
       <div className="logo">
         <Logo onClick={handleClickOpen} />
@@ -213,10 +243,8 @@ function MissionList() {
         >
           Liste des Missions
         </h4>
-        <div
-          className={`btn btn-primary btn-success btn-add-new add-user ${
-            loggedInUser.role != "Superviseur" ? "no-display" : ""
-          }`}
+ {      loggedInUser && loggedInUser.role == "Superviseur" && <div
+          className={`btn btn-primary btn-success btn-add-new add-user`}
         >
           <img src={addIcon} alt="add icon" />
           <span>
@@ -227,7 +255,7 @@ function MissionList() {
               Créer une Mission
             </Link>
           </span>
-        </div>
+        </div>}
       </div>
 
         <div className="missions">
@@ -235,13 +263,23 @@ function MissionList() {
           
         <MaterialReactTable columns={columns1} data={missions}
             enableTopToolbar={false}
-            initialState={{ showColumnFilters: true }} 
+            initialState={{
+              showColumnFilters: true,
+              pagination: { pageSize: 20, pageIndex: 0 },
+            }}
+            onPaginationChange={setPagination}
+            state={{ pagination }}
+            showProgressBars
+            icons={{
+              FilterListIcon: CustomButton,
+              FilterListOffIcon: CustomButton,
+            }}
             enableColumnActions={false}
 
             muiTableBodyRowProps={({ row }) => ({
               onClick: (event) => {
-                console.info(row.original.id);
-                navigate(`/missions/${row.original.id}`);
+                if(event.target.cellIndex != undefined)
+                  navigate(`/missions/${row.original.id}`);
               },
             })}
 

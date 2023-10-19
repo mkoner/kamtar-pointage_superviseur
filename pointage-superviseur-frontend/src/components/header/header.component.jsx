@@ -1,5 +1,5 @@
 import React from 'react'
-import  Logo from '../../assets/splash.png'
+import  Logo from '../../assets/logo_picto.png'
 import './header.component.scss'
 
 
